@@ -35,6 +35,9 @@
               url = "https://github.com/llvm/llvm-project.git";
               rev = "llvmorg-22.1.7";
               sparseCheckout = [ "llvm/utils/lit" ];
+              /*
+                only used on the first run to get the real hash to put below
+              */
               # hash = pkgs.lib.fakeHash;
               hash = "sha256-rGfANVfUWXcbhSsb3byfFKiyZ385SF1RpXSqlA0zgPA=";
             };
@@ -48,6 +51,15 @@
               pkgs.cmake
               lit
             ];
+
+            /*
+              nix clang wrapper injects -isystem for llvm includes at
+              invocation time so compilation works, but compile_commands.json
+              records commands before the wrapper acts so clangd can't find
+              them. this env var gets picked up by cmake and written into
+              compile_commands.json so clangd (LSP) sees the paths too
+            */
+            env.CXXFLAGS = "-isystem ${llvmPkgs.llvm.dev}/include";
           };
         }
       );
