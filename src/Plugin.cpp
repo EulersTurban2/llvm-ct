@@ -28,6 +28,7 @@ PassPluginLibraryInfo getPluginInfo() {
           }};
 }
 
+
 extern "C" ::llvm::PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK
 llvmGetPassPluginInfo() {
   return getPluginInfo();
