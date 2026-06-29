@@ -1,7 +1,5 @@
 ; Combined CTBranchPass + CTDataPass test
 ;
-; C equivalent:
-;
 ;   void store_in_branch(int secret, int idx) {
 ;       int arr[4];
 ;       if (secret > 0) {

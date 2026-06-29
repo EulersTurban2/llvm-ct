@@ -13,6 +13,8 @@ using namespace llvm;
 
 namespace ct {
 
+// TODO add debug logs...
+
 // Replaces a sensitive load with a stride over all candidate slots.
 // Every slot is unconditionally loaded; a chain of selects picks the
 // value from the slot whose pointer matches the original pointer.
@@ -28,8 +30,8 @@ static Value *emitCTLoad(LoadInst *LI, const MemoryObject &Obj,
   Value *Result = UndefValue::get(T);
   for (uint64_t i = 0; i < N; i++) {
     uint64_t ElemIdx = static_cast<uint64_t>(Obj.OffsetLow) / Stride + i;
-    Value *SlotPtr = B.CreateGEP(T, Obj.Base,
-                                 ConstantInt::get(Type::getInt64Ty(Ctx), ElemIdx));
+    Value *SlotPtr = B.CreateGEP(
+        T, Obj.Base, ConstantInt::get(Type::getInt64Ty(Ctx), ElemIdx));
     Value *Loaded = B.CreateLoad(T, SlotPtr);
     Value *Cmp = B.CreateICmpEQ(OrigPtr, SlotPtr);
     Result = B.CreateSelect(Cmp, Loaded, Result);
@@ -52,8 +54,8 @@ static void emitCTStore(StoreInst *SI, const MemoryObject &Obj,
 
   for (uint64_t i = 0; i < N; i++) {
     uint64_t ElemIdx = static_cast<uint64_t>(Obj.OffsetLow) / Stride + i;
-    Value *SlotPtr = B.CreateGEP(T, Obj.Base,
-                                 ConstantInt::get(Type::getInt64Ty(Ctx), ElemIdx));
+    Value *SlotPtr = B.CreateGEP(
+        T, Obj.Base, ConstantInt::get(Type::getInt64Ty(Ctx), ElemIdx));
     Value *Existing = B.CreateLoad(T, SlotPtr);
     Value *Cmp = B.CreateICmpEQ(OrigPtr, SlotPtr);
     Value *Sel = B.CreateSelect(Cmp, Val, Existing);
@@ -82,7 +84,7 @@ PreservedAnalyses CTDataPass::run(Function &F, FunctionAnalysisManager &FAM) {
 
     const MemoryObject &Obj = It->second;
 
-    // Argument-based objects have unknown extent — skip for now.
+    // Argument-based objects have unknown extent - skip for now.
     if (isa<Argument>(Obj.Base))
       continue;
 

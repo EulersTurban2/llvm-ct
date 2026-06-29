@@ -1,8 +1,8 @@
 #include "llvm/IR/Argument.h"
+#include "llvm/IR/Constants.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Module.h"
-#include "llvm/IR/Constants.h"
 #include "llvm/Support/raw_ostream.h"
 
 #include "ArgDepAnalysis.h"
@@ -14,6 +14,8 @@
 using namespace llvm;
 
 namespace ct {
+
+// TODO add debug logs...
 
 AnalysisKey DataAnalysis::Key;
 
@@ -40,7 +42,8 @@ static Value *traceToBase(Value *Ptr) {
 DataResult DataAnalysis::run(Function &F, FunctionAnalysisManager &FAM) {
   DataResult Res;
   const DataLayout &DL = F.getParent()->getDataLayout();
-  // Take the argument masked analysis, since we only care about the instructions that are dependent on marked values
+  // Take the argument masked analysis, since we only care about the
+  // instructions that are dependent on marked values
   auto &Dep = FAM.getResult<ArgDepAnalysis>(F);
 
   for (auto &BB : F) {
@@ -72,13 +75,13 @@ DataResult DataAnalysis::run(Function &F, FunctionAnalysisManager &FAM) {
         Type *Form = Alloca->getAllocatedType();
         uint64_t ElemSize = DL.getTypeAllocSize(Form).getFixedValue();
         uint64_t TotalSize = ElemSize * ArraySize->getZExtValue();
-        Res.Objects[&I] = {Alloca, &F, 0, static_cast<int64_t>(TotalSize),
+        Res.Objects[&I] = {Alloca,    &F,  0, static_cast<int64_t>(TotalSize),
                            TotalSize, Form};
       } else {
         // Pointer-typed argument: extent is unknown, use the access type.
         uint64_t Size = DL.getTypeAllocSize(AccessType).getFixedValue();
-        Res.Objects[&I] = {Base, &F, 0, static_cast<int64_t>(Size), Size,
-                           AccessType};
+        Res.Objects[&I] = {Base, &F,        0, static_cast<int64_t>(Size),
+                           Size, AccessType};
       }
     }
   }
@@ -98,8 +101,10 @@ PreservedAnalyses DataPrinterPass::run(Function &F,
   std::sort(Sorted.begin(), Sorted.end(), [&F](auto &A, auto &B) {
     for (auto &BB : F)
       for (auto &I : BB) {
-        if (&I == A.first) return true;
-        if (&I == B.first) return false;
+        if (&I == A.first)
+          return true;
+        if (&I == B.first)
+          return false;
       }
     return false;
   });
@@ -110,7 +115,8 @@ PreservedAnalyses DataPrinterPass::run(Function &F,
            << "    base:     " << *Obj->Base << "\n"
            << "    form:     " << *Obj->Form << "\n"
            << "    size:     " << Obj->Size << " bytes\n"
-           << "    interval: [" << Obj->OffsetLow << ", " << Obj->OffsetHigh << "]\n";
+           << "    interval: [" << Obj->OffsetLow << ", " << Obj->OffsetHigh
+           << "]\n";
   }
 
   return PreservedAnalyses::all();

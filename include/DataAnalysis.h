@@ -13,10 +13,10 @@ namespace ct {
 
 // Describes a statically-known memory region rooted at an alloca.
 // Interval [OffsetLow, OffsetHigh) is in bytes relative to Base.
-// Size is the size of the pointed-to type (Form) at this level —
+// Size is the size of the pointed-to type (Form) at this level -
 // distinct from the interval width once we handle GEPs.
 // Base is AllocaInst for local variables, or Argument for pointer parameters.
-// For arguments the allocation extent is unknown — Size and Form reflect only
+// For arguments the allocation extent is unknown - Size and Form reflect only
 // the type at the access site, not the full object.
 struct MemoryObject {
   llvm::Value *Base;       // root: AllocaInst or Argument

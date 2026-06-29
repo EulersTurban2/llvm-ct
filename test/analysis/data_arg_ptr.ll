@@ -1,11 +1,9 @@
-; C equivalent:
-;
-; // pointer argument accessed directly — arr is tainted (argument)
+; // pointer argument accessed directly - arr is tainted (argument)
 ; void store_to_arg(int *arr, int secret) {
 ;     arr[0] = secret;
 ; }
 ;
-; // pointer argument with secret-derived index — both arr and secret tainted
+; // pointer argument with secret-derived index - both arr and secret tainted
 ; int load_from_arg(int *arr, int secret) {
 ;     return arr[secret & 3];
 ; }
